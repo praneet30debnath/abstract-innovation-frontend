@@ -150,3 +150,63 @@
 .phone-item a:hover {
   color: #3b82f6;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0;
+    flex: none;
+  }
+
+  .logo {
+    height: 60px;
+  }
+
+  .nav-menu {
+    gap: 15px;
+  }
+
+  .nav-menu a {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+
+  .App-header {
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 20px;
+    padding: 0 10px;
+  }
+
+  .service-card {
+    padding: 20px;
+  }
+
+  .service-icon {
+    font-size: 50px;
+  }
+
+  .phone-item {
+    min-width: auto;
+    width: 90%;
+    padding: 12px 20px;
+  }
+
+  .contact-details {
+    margin-top: 20px;
+  }
+
+  .footer {
+    padding: 15px;
+  }
+
+  .contact-info a {
+    display: block;
+    margin: 5px 0;
+  }
+}
