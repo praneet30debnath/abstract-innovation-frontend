@@ -2,7 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import Home from './components/Home';
-import Services from './components/Services';
+import Products from './components/Products';
+import ProductDetail from './components/ProductDetail';
 import ContactUs from './components/ContactUs';
 
 function App() {
@@ -15,14 +16,15 @@ function App() {
           </div>
           <nav className="nav-menu">
             <Link to="/">Home</Link>
-            <Link to="/services">Services</Link>
+            <Link to="/products">Products</Link>
             <Link to="/contact">Contact Us</Link>
           </nav>
         </header>
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/services" element={<Services />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:productName" element={<ProductDetail />} />
             <Route path="/contact" element={<ContactUs />} />
           </Routes>
         </main>
