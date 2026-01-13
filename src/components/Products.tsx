@@ -5,16 +5,15 @@ import { Container, Typography, Card, CardContent, CardMedia, Box } from '@mui/m
 function Products() {
   const products = [
     { title: 'Customized Cup', icon: '☕', image: '/images/products/category-customized-cup.jpg' },
-    { title: 'Customized Bottle', icon: '🍶', image: null },
-    { title: 'Customized Photo Frame', icon: '🖼️', image: null },
-    { title: 'Customized Cushion Cover', icon: '🛋️', image: null },
-    { title: 'Fridge Magnet', icon: '🧲', image: null },
-    { title: 'Coasters', icon: '🟫', image: null },
-    { title: 'Tote Bag', icon: '👜', image: null },
-    { title: 'T Shirt', icon: '👕', image: null },
-    { title: 'Memento', icon: '🎁', image: null },
-    { title: 'Customized Candle', icon: '🕯️', image: null },
-    { title: 'CCTV', icon: '📹', image: null }
+    { title: 'Customized Bottle', icon: '🍶', image: '/images/products/category-customized-bottle.jpg' },
+    { title: 'Customized Photo Frame', icon: '🖼️', image: '/images/products/category-customized-photo-frame.jpg' },
+    { title: 'Customized Cushion Cover', icon: '🛋️', image: '/images/products/category-customized-cushion-cover.jpg' },
+    { title: 'Fridge Magnet', icon: '🧲', image: '/images/products/category-fridge-magnet.jpg' },
+    { title: 'Tote Bag', icon: '👜', image: '/images/products/category-tote-bag.jpg' },
+    { title: 'T Shirt', icon: '👕', image: '/images/products/category-t-shirt.jpg' },
+    { title: 'Memento', icon: '🎁', image: '/images/products/category-memento.jpg' },
+    { title: 'Customized Candle', icon: '🕯️', image: '/images/products/category-customized-candle.jpg' },
+    { title: 'CCTV', icon: '📹', image: '/images/products/category-cctv.jpg' }
   ];
 
   // Helper function to create URL slug from product title
@@ -23,7 +22,23 @@ function Products() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 2 }}>
+    <Container
+      maxWidth="lg"
+      sx={{
+        py: 2,
+        animation: 'fadeIn 0.4s ease-in-out',
+        '@keyframes fadeIn': {
+          '0%': {
+            opacity: 0,
+            transform: 'translateY(10px)',
+          },
+          '100%': {
+            opacity: 1,
+            transform: 'translateY(0)',
+          },
+        },
+      }}
+    >
       <Box sx={{ textAlign: 'center', mb: 3 }}>
         <Typography
           variant="h2"
@@ -96,7 +111,7 @@ function Products() {
                   height="250"
                   image={product.image}
                   alt={product.title}
-                  sx={{ objectFit: 'contain', backgroundColor: '#ffffff' }}
+                  sx={{ objectFit: 'cover', backgroundColor: '#ffffff' }}
                 />
               ) : (
                 <Box sx={{ fontSize: '3rem', textAlign: 'center', py: 4 }}>

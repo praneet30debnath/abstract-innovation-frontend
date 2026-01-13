@@ -3,7 +3,22 @@ import { Box, Container, Typography } from '@mui/material';
 
 function Home() {
   return (
-    <Container maxWidth="lg">
+    <Container
+      maxWidth="lg"
+      sx={{
+        animation: 'fadeIn 0.4s ease-in-out',
+        '@keyframes fadeIn': {
+          '0%': {
+            opacity: 0,
+            transform: 'translateY(10px)',
+          },
+          '100%': {
+            opacity: 1,
+            transform: 'translateY(0)',
+          },
+        },
+      }}
+    >
       <Box
         sx={{
           minHeight: '50vh',

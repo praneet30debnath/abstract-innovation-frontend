@@ -3,7 +3,22 @@ import { Container, Typography, Box } from '@mui/material';
 
 function ContactUs() {
   return (
-    <Container maxWidth="lg">
+    <Container
+      maxWidth="lg"
+      sx={{
+        animation: 'fadeIn 0.4s ease-in-out',
+        '@keyframes fadeIn': {
+          '0%': {
+            opacity: 0,
+            transform: 'translateY(10px)',
+          },
+          '100%': {
+            opacity: 1,
+            transform: 'translateY(0)',
+          },
+        },
+      }}
+    >
       <Box
         sx={{
           minHeight: '50vh',
@@ -57,17 +72,49 @@ function ContactUs() {
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
             Phone Numbers:
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Typography variant="h6">
-              <a href="tel:+913346039929" style={{ textDecoration: 'none', color: 'inherit' }}>
-                +91 33 4603 9929
-              </a>
-            </Typography>
-            <Typography variant="h6">
-              <a href="tel:+919830064192" style={{ textDecoration: 'none', color: 'inherit' }}>
-                +91 98300 64192
-              </a>
-            </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box
+              sx={{
+                backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                border: '1px solid rgba(25, 118, 210, 0.3)',
+                color: 'primary.main',
+                py: 2,
+                px: 3,
+                borderRadius: 2,
+                transition: 'transform 0.2s, background-color 0.2s',
+                '&:hover': {
+                  transform: 'scale(1.02)',
+                  backgroundColor: 'rgba(25, 118, 210, 0.15)',
+                },
+              }}
+            >
+              <Typography variant="h6">
+                <a href="tel:+913346039929" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  +91 33 4603 9929
+                </a>
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                border: '1px solid rgba(25, 118, 210, 0.3)',
+                color: 'primary.main',
+                py: 2,
+                px: 3,
+                borderRadius: 2,
+                transition: 'transform 0.2s, background-color 0.2s',
+                '&:hover': {
+                  transform: 'scale(1.02)',
+                  backgroundColor: 'rgba(25, 118, 210, 0.15)',
+                },
+              }}
+            >
+              <Typography variant="h6">
+                <a href="tel:+919830064192" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  +91 98300 64192
+                </a>
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Box>
