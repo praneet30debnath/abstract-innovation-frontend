@@ -6,13 +6,13 @@ function Home() {
     <Container maxWidth="lg">
       <Box
         sx={{
-          minHeight: '80vh',
+          minHeight: '50vh',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           textAlign: 'center',
-          py: 8,
+          py: 2,
         }}
       >
         <Typography
@@ -21,7 +21,7 @@ function Home() {
           gutterBottom
           sx={{
             fontWeight: 700,
-            mb: 3,
+            mb: 2,
             fontSize: {
               xs: '2rem',
               sm: '2.5rem',
@@ -36,7 +36,7 @@ function Home() {
           variant="h5"
           color="text.secondary"
           sx={{
-            mb: 6,
+            mb: 3,
             maxWidth: '800px',
             fontSize: {
               xs: '1rem',
@@ -53,7 +53,7 @@ function Home() {
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 2,
+            gap: 1.5,
             maxWidth: '600px',
             px: 2,
           }}
