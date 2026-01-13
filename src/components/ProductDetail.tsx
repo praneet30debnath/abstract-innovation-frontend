@@ -70,14 +70,15 @@ function ProductDetail() {
   const variants = productData[productName || ''] || [];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 8 }}>
-      <Box sx={{ textAlign: 'center', mb: 6 }}>
+    <Container maxWidth="lg" sx={{ py: 2 }}>
+      <Box sx={{ textAlign: 'center', mb: 3 }}>
         <Typography
           variant="h2"
           component="h1"
           gutterBottom
           sx={{
             fontWeight: 700,
+            mb: 2,
             fontSize: {
               xs: '2rem',
               sm: '2.5rem',
@@ -87,7 +88,21 @@ function ProductDetail() {
         >
           {displayName}
         </Typography>
-        <Typography variant="h6" color="text.secondary">
+        <Typography
+          variant="h5"
+          color="text.secondary"
+          sx={{
+            mb: 3,
+            maxWidth: '800px',
+            mx: 'auto',
+            fontSize: {
+              xs: '1rem',
+              sm: '1.25rem',
+              md: '1.5rem',
+            },
+            px: 2,
+          }}
+        >
           Choose from our collection
         </Typography>
       </Box>

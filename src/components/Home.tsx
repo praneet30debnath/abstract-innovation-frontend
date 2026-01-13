@@ -38,6 +38,7 @@ function Home() {
           sx={{
             mb: 3,
             maxWidth: '800px',
+            mx: 'auto',
             fontSize: {
               xs: '1rem',
               sm: '1.25rem',
