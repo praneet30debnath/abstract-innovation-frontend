@@ -17,7 +17,17 @@
 
 .logo-container {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+}
+
+.tagline {
+  color: #1e3a8a;
+  font-size: 18px;
+  font-weight: 500;
+  margin: 10px 0 0 0;
+  font-style: italic;
 }
 
 .logo {
@@ -48,8 +58,6 @@
 .main-content {
   flex: 1;
   padding: 40px 20px;
-  max-width: 1200px;
-  margin: 0 auto;
   width: 100%;
 }
 
@@ -160,6 +168,10 @@
 
   .logo {
     height: 60px;
+  }
+
+  .tagline {
+    font-size: 14px;
   }
 
   .nav-menu {

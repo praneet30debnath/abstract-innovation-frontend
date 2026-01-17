@@ -13,6 +13,7 @@ function App() {
         <header className="App-header">
           <div className="logo-container">
             <img src="/logo.png" alt="Abstract Innovation Logo" className="logo" />
+            <p className="tagline">Turn Moments into Memories</p>
           </div>
           <nav className="nav-menu">
             <Link to="/">Home</Link>
