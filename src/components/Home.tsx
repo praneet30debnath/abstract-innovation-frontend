@@ -163,7 +163,7 @@ function Home() {
         <Typography
           variant="h6"
           color="text.secondary"
-          sx={{ mb: 3, fontSize: { xs: '1rem', md: '1.25rem' } }}
+          sx={{ mb: { xs: 1, md: 3 }, fontSize: { xs: '1rem', md: '1.25rem' } }}
         >
           {festivalBanner.subtitle}
         </Typography>
@@ -176,7 +176,6 @@ function Home() {
                 position: 'relative',
                 overflow: 'hidden',
                 borderRadius: 2,
-                height: { xs: 250, sm: 400, md: 750 },
               }}
             >
               {/* Sliding Track */}
@@ -184,7 +183,6 @@ function Home() {
                 sx={{
                   display: 'flex',
                   width: `${festivalBanner.products.length * 100}%`,
-                  height: '100%',
                   transition: 'transform 0.5s ease-in-out',
                   transform: `translateX(-${currentSlide * (100 / festivalBanner.products.length)}%)`,
                 }}
@@ -197,8 +195,7 @@ function Home() {
                     alt={product.name}
                     sx={{
                       width: `${100 / festivalBanner.products.length}%`,
-                      height: '100%',
-                      objectFit: 'contain',
+                      height: 'auto',
                       flexShrink: 0,
                     }}
                   />
