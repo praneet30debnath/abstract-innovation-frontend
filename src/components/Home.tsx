@@ -249,7 +249,7 @@ function Home() {
           {festivalBanner.products.map((_, index) => (
             <Box
               key={index}
-              onClick={() => setCurrentSlide(index)}
+              onClick={() => goToSlide(index)}
               sx={{
                 width: 12,
                 height: 12,
