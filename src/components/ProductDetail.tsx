@@ -1,16 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Typography, Box, Card, CardMedia, CardContent } from '@mui/material';
-
-interface ProductVariant {
-  name: string;
-  price: number;
-  image: string;
-}
-
-interface ProductData {
-  [key: string]: ProductVariant[];
-}
+import productData from '../utils/productData';
 
 function ProductDetail() {
   const { productName } = useParams<{ productName: string }>();
@@ -21,53 +12,7 @@ function ProductDetail() {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ') || '';
 
-  // Product variants data
-  const productData: ProductData = {
-    'customized-cup': [
-      {
-        name: 'Patch Cup',
-        price: 265,
-        image: '/images/products/patch-cup.jpg'
-      },
-      {
-        name: 'Magic Cup',
-        price: 260,
-        image: '/images/products/magic-cup.jpg'
-      },
-      {
-        name: 'Glitter Cup',
-        price: 290,
-        image: '/images/products/glitter-cup.jpg'
-      },
-      {
-        name: 'Travel Cup',
-        price: 585,
-        image: '/images/products/travel-cup.jpg'
-      },
-      {
-        name: 'Beer Mug',
-        price: 590,
-        image: '/images/products/beer-mug.jpg'
-      },
-      {
-        name: 'Mason Jar',
-        price: 395,
-        image: '/images/products/mason-jar.jpg'
-      }
-    ],
-    'customized-bottle': [],
-    'customized-photo-frame': [],
-    'customized-cushion-cover': [],
-    'fridge-magnet': [],
-    'coasters': [],
-    'tote-bag': [],
-    't-shirt': [],
-    'memento': [],
-    'customized-candle': [],
-    'cctv': []
-  };
-
-  const variants = productData[productName || ''] || [];
+  const variants = [...(productData[productName || ''] || [])].sort((a, b) => a.price - b.price);
 
   return (
     <Container
@@ -162,6 +107,11 @@ function ProductDetail() {
               <Typography variant="h5" color="primary" sx={{ fontWeight: 600 }}>
                 ₹{variant.price}
               </Typography>
+              {variant.dimensions && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  {variant.dimensions.height} x {variant.dimensions.width} {variant.dimensions.unit}
+                </Typography>
+              )}
             </CardContent>
           </Card>
         ))}

@@ -2,17 +2,44 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, Container, Typography, Button, Card, CardContent, CardMedia, Grid } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 
-const festivalBanner = {
-  title: 'Saraswati Puja Special',
-  subtitle: 'Celebrate wisdom with personalized gifts',
-  accentColor: '#f9a825',
-  products: [
-    { name: 'Customized Candle', image: '/images/banners/saraswati_banner.png', slug: 'customized-candle' },
-    { name: 'Customized Cup', image: '/images/banners/saraswati_education.png', slug: 'customized-cup' },
-    { name: 'Customized Fashion Apparel', image: '/images/banners/saraswati_fashion.png', slug: 'customized-photo-frame' },
-    { name: 'Customized Fashion Apparel', image: '/images/banners/saraswati_sweet.png', slug: 'memento' },
-  ],
-};
+// Festival banners with date ranges — add new entries to show banners for upcoming festivals.
+// The banner will automatically appear on startDate and disappear after endDate.
+const festivalBanners = [
+  {
+    title: 'Saraswati Puja Special',
+    subtitle: 'Celebrate wisdom with personalized gifts',
+    accentColor: '#f9a825',
+    startDate: '2026-01-25',
+    endDate: '2026-02-05',
+    products: [
+      { name: 'Customized Candle', image: '/images/banners/saraswati_banner.png', slug: 'customized-candle' },
+      { name: 'Customized Cup', image: '/images/banners/saraswati_education.png', slug: 'customized-cup' },
+      { name: 'Customized Fashion Apparel', image: '/images/banners/saraswati_fashion.png', slug: 'customized-photo-frame' },
+      { name: 'Customized Fashion Apparel', image: '/images/banners/saraswati_sweet.png', slug: 'memento' },
+    ],
+  },
+  // Example: add more festivals like this:
+  // {
+  //   title: 'Holi Special',
+  //   subtitle: 'Celebrate colors with personalized gifts',
+  //   accentColor: '#e91e63',
+  //   startDate: '2026-03-01',
+  //   endDate: '2026-03-14',
+  //   products: [
+  //     { name: 'Product Name', image: '/images/banners/holi_banner.png', slug: 'product-slug' },
+  //   ],
+  // },
+];
+
+function getActiveFestivalBanner() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return festivalBanners.find(banner => {
+    const start = new Date(banner.startDate + 'T00:00:00');
+    const end = new Date(banner.endDate + 'T23:59:59');
+    return today >= start && today <= end;
+  }) ?? null;
+}
 
 const featuredProducts = [
   { name: 'Customized Cup', image: '/images/products/category-customized-cup.jpg', slug: 'customized-cup' },
@@ -37,6 +64,8 @@ const howItWorks = [
 
 function Home() {
   const navigate = useNavigate();
+  const activeBanner = getActiveFestivalBanner();
+  const slideCount = activeBanner?.products.length || 1;
   const [currentSlide, setCurrentSlide] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -44,10 +73,11 @@ function Home() {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
+    if (!activeBanner) return;
     intervalRef.current = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % festivalBanner.products.length);
+      setCurrentSlide((prev) => (prev + 1) % slideCount);
     }, 3000);
-  }, []);
+  }, [activeBanner, slideCount]);
 
   const goToSlide = useCallback((index: number) => {
     setCurrentSlide(index);
@@ -55,14 +85,14 @@ function Home() {
   }, [startAutoSlide]);
 
   const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % festivalBanner.products.length);
+    setCurrentSlide((prev) => (prev + 1) % slideCount);
     startAutoSlide();
-  }, [startAutoSlide]);
+  }, [startAutoSlide, slideCount]);
 
   const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + festivalBanner.products.length) % festivalBanner.products.length);
+    setCurrentSlide((prev) => (prev - 1 + slideCount) % slideCount);
     startAutoSlide();
-  }, [startAutoSlide]);
+  }, [startAutoSlide, slideCount]);
 
   useEffect(() => {
     startAutoSlide();
@@ -147,118 +177,120 @@ function Home() {
         </Box>
       </Box>
 
-      {/* Festival Banner with Carousel */}
-      <Box sx={{ mb: 6, textAlign: 'center' }}>
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: 700,
-            color: festivalBanner.accentColor,
-            mb: 1,
-            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' },
-          }}
-        >
-          {festivalBanner.title}
-        </Typography>
-        <Typography
-          variant="h6"
-          color="text.secondary"
-          sx={{ mb: { xs: 1, md: 3 }, fontSize: { xs: '1rem', md: '1.25rem' } }}
-        >
-          {festivalBanner.subtitle}
-        </Typography>
+      {/* Festival Banner with Carousel — only shown when a festival is active */}
+      {activeBanner && (
+        <Box sx={{ mb: 6, textAlign: 'center' }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              color: activeBanner.accentColor,
+              mb: 1,
+              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' },
+            }}
+          >
+            {activeBanner.title}
+          </Typography>
+          <Typography
+            variant="h6"
+            color="text.secondary"
+            sx={{ mb: { xs: 1, md: 3 }, fontSize: { xs: '1rem', md: '1.25rem' } }}
+          >
+            {activeBanner.subtitle}
+          </Typography>
 
-        {/* Image Carousel */}
-        <Box sx={{ position: 'relative', width: '100%' }}>
-          <Link to={`/products/${festivalBanner.products[currentSlide].slug}`} style={{ textDecoration: 'none' }}>
-            <Box
-              sx={{
-                position: 'relative',
-                overflow: 'hidden',
-                borderRadius: 2,
-              }}
-            >
-              {/* Sliding Track */}
+          {/* Image Carousel */}
+          <Box sx={{ position: 'relative', width: '100%' }}>
+            <Link to={`/products/${activeBanner.products[currentSlide].slug}`} style={{ textDecoration: 'none' }}>
               <Box
                 sx={{
-                  display: 'flex',
-                  width: `${festivalBanner.products.length * 100}%`,
-                  transition: 'transform 0.5s ease-in-out',
-                  transform: `translateX(-${currentSlide * (100 / festivalBanner.products.length)}%)`,
+                  position: 'relative',
+                  overflow: 'hidden',
+                  borderRadius: 2,
                 }}
               >
-                {festivalBanner.products.map((product, index) => (
-                  <Box
-                    key={index}
-                    component="img"
-                    src={product.image}
-                    alt={product.name}
-                    sx={{
-                      width: `${100 / festivalBanner.products.length}%`,
-                      height: 'auto',
-                      flexShrink: 0,
-                    }}
-                  />
-                ))}
+                {/* Sliding Track */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    width: `${activeBanner.products.length * 100}%`,
+                    transition: 'transform 0.5s ease-in-out',
+                    transform: `translateX(-${currentSlide * (100 / activeBanner.products.length)}%)`,
+                  }}
+                >
+                  {activeBanner.products.map((product, index) => (
+                    <Box
+                      key={index}
+                      component="img"
+                      src={product.image}
+                      alt={product.name}
+                      sx={{
+                        width: `${100 / activeBanner.products.length}%`,
+                        height: 'auto',
+                        flexShrink: 0,
+                      }}
+                    />
+                  ))}
+                </Box>
               </Box>
-            </Box>
-          </Link>
+            </Link>
 
-          {/* Navigation Arrows */}
-          <Button
-            onClick={prevSlide}
-            sx={{
-              position: 'absolute',
-              left: { xs: 10, md: 20 },
-              top: '50%',
-              transform: 'translateY(-50%)',
-              minWidth: { xs: 40, md: 50 },
-              height: { xs: 40, md: 50 },
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              fontSize: { xs: '1.5rem', md: '2rem' },
-              '&:hover': { backgroundColor: 'white' },
-            }}
-          >
-            &#8249;
-          </Button>
-          <Button
-            onClick={nextSlide}
-            sx={{
-              position: 'absolute',
-              right: { xs: 10, md: 20 },
-              top: '50%',
-              transform: 'translateY(-50%)',
-              minWidth: { xs: 40, md: 50 },
-              height: { xs: 40, md: 50 },
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              fontSize: { xs: '1.5rem', md: '2rem' },
-              '&:hover': { backgroundColor: 'white' },
-            }}
-          >
-            &#8250;
-          </Button>
-        </Box>
-
-        {/* Dots Indicator */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 2 }}>
-          {festivalBanner.products.map((_, index) => (
-            <Box
-              key={index}
-              onClick={() => goToSlide(index)}
+            {/* Navigation Arrows */}
+            <Button
+              onClick={prevSlide}
               sx={{
-                width: 12,
-                height: 12,
+                position: 'absolute',
+                left: { xs: 10, md: 20 },
+                top: '50%',
+                transform: 'translateY(-50%)',
+                minWidth: { xs: 40, md: 50 },
+                height: { xs: 40, md: 50 },
                 borderRadius: '50%',
-                backgroundColor: index === currentSlide ? festivalBanner.accentColor : '#ccc',
-                cursor: 'pointer',
-                transition: 'background-color 0.3s',
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                fontSize: { xs: '1.5rem', md: '2rem' },
+                '&:hover': { backgroundColor: 'white' },
               }}
-            />
-          ))}
+            >
+              &#8249;
+            </Button>
+            <Button
+              onClick={nextSlide}
+              sx={{
+                position: 'absolute',
+                right: { xs: 10, md: 20 },
+                top: '50%',
+                transform: 'translateY(-50%)',
+                minWidth: { xs: 40, md: 50 },
+                height: { xs: 40, md: 50 },
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                fontSize: { xs: '1.5rem', md: '2rem' },
+                '&:hover': { backgroundColor: 'white' },
+              }}
+            >
+              &#8250;
+            </Button>
+          </Box>
+
+          {/* Dots Indicator */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 2 }}>
+            {activeBanner.products.map((_, index) => (
+              <Box
+                key={index}
+                onClick={() => goToSlide(index)}
+                sx={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: '50%',
+                  backgroundColor: index === currentSlide ? activeBanner.accentColor : '#ccc',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s',
+                }}
+              />
+            ))}
+          </Box>
         </Box>
-      </Box>
+      )}
 
       {/* Featured Products */}
       <Box sx={{ mb: 6 }}>
