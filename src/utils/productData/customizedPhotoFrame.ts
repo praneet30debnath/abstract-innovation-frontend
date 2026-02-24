@@ -49,6 +49,18 @@ const customizedPhotoFrame: ProductVariant[] = [
     image: '/images/products/crystal-photo-frame.webp',
     dimensions: { height: 18, width: 13, unit: 'cm' },
   },
+  {
+    name: 'A4 Photo Frame',
+    price: 390,
+    image: '/images/products/a4-photo-frame.png',
+    dimensions: { height: 31, width: 21, unit: 'cm' },
+  },
+  {
+    name: 'A4 LED Photo Frame',
+    price: 705,
+    image: '/images/products/a4-led-photo-frame.jpeg',
+    dimensions: { height: 31, width: 21, unit: 'cm' },
+  },
 ];
 
 export default customizedPhotoFrame;
