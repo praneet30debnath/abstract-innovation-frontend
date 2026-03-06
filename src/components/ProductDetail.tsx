@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Typography, Box, Card, CardContent, IconButton } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -11,8 +11,21 @@ function ImageCarousel({ images, alt }: { images: string[]; alt: string }) {
   const [animating, setAnimating] = useState<'left' | 'right' | null>(null);
   const [completing, setCompleting] = useState(false);
   const touchStartX = React.useRef<number | null>(null);
+  const touchStartY = React.useRef<number | null>(null);
+  const swipeAxis = React.useRef<'horizontal' | 'vertical' | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const lockedRef = React.useRef(false);
+
+  // Attach touchmove as non-passive so preventDefault works
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onTouchMove = (e: TouchEvent) => {
+      if (swipeAxis.current === 'horizontal') e.preventDefault();
+    };
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => el.removeEventListener('touchmove', onTouchMove);
+  }, []);
 
   const total = images.length;
   const nextIdx = (current + 1) % total;
@@ -44,16 +57,35 @@ function ImageCarousel({ images, alt }: { images: string[]; alt: string }) {
   const handleTouchStart = (e: React.TouchEvent) => {
     if (lockedRef.current || total <= 1) return;
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    swipeAxis.current = null;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    setDragOffset(e.touches[0].clientX - touchStartX.current);
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+
+    // Determine axis on first meaningful movement
+    if (swipeAxis.current === null && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+      swipeAxis.current = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical';
+    }
+
+    if (swipeAxis.current !== 'horizontal') return;
+
+    e.preventDefault(); // prevent page scroll only for horizontal swipes
+    setDragOffset(dx);
   };
 
   const handleTouchEnd = () => {
     if (touchStartX.current === null) return;
     touchStartX.current = null;
+    touchStartY.current = null;
+    if (swipeAxis.current !== 'horizontal') {
+      swipeAxis.current = null;
+      return;
+    }
+    swipeAxis.current = null;
     const w = containerRef.current?.offsetWidth || 300;
 
     if (dragOffset < -40) {
@@ -102,7 +134,6 @@ function ImageCarousel({ images, alt }: { images: string[]; alt: string }) {
         height: 300,
         overflow: 'hidden',
         backgroundColor: '#ffffff',
-        touchAction: 'pan-y',
         '@keyframes slideOutLeft': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-100%)' } },
         '@keyframes slideOutRight': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(100%)' } },
         '@keyframes slideInFromRight': { from: { transform: 'translateX(100%)' }, to: { transform: 'translateX(0)' } },
