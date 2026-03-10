@@ -252,74 +252,158 @@ function ImageCarousel({ images, alt }: { images: string[]; alt: string }) {
   );
 }
 
-function ColorPickerCard({ name, price, colors }: { name: string; price: number; colors: ColorVariant[] }) {
-  const [selected, setSelected] = useState(0);
-  const active = colors[selected];
+function ImageLightbox({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
+  // Close on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
 
   return (
-    <Card
+    <Box
+      onClick={onClose}
       sx={{
-        height: '100%',
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1300,
+        backgroundColor: 'rgba(0,0,0,0.85)',
         display: 'flex',
-        flexDirection: 'column',
-        transition: 'transform 0.3s, box-shadow 0.3s',
-        '&:hover': { transform: 'translateY(-8px)', boxShadow: 6 },
+        alignItems: 'center',
+        justifyContent: 'center',
+        animation: 'fadeIn 0.2s ease',
+        '@keyframes fadeIn': { from: { opacity: 0 }, to: { opacity: 1 } },
+        cursor: 'zoom-out',
       }}
     >
       <Box
         component="img"
-        src={active.image}
-        alt={`${name} - ${active.name}`}
+        src={src}
+        alt={alt}
+        onClick={e => e.stopPropagation()}
         sx={{
-          width: '100%',
-          height: 300,
+          maxWidth: '90vw',
+          maxHeight: '90vh',
           objectFit: 'contain',
-          backgroundColor: '#ffffff',
+          borderRadius: 2,
+          boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+          animation: 'zoomIn 0.2s ease',
+          '@keyframes zoomIn': { from: { transform: 'scale(0.9)', opacity: 0 }, to: { transform: 'scale(1)', opacity: 1 } },
+          cursor: 'default',
         }}
       />
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Typography variant="h6" component="h3" gutterBottom>
-          {name}
-        </Typography>
-        <Typography variant="h5" color="primary" sx={{ fontWeight: 600, mb: 1.5 }}>
-          ₹{price}
-        </Typography>
+      {/* Close hint */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 16,
+          right: 20,
+          color: 'white',
+          fontSize: '2rem',
+          lineHeight: 1,
+          cursor: 'pointer',
+          opacity: 0.8,
+          '&:hover': { opacity: 1 },
+        }}
+        onClick={onClose}
+      >
+        ✕
+      </Box>
+    </Box>
+  );
+}
 
-        {/* Color label */}
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Color: <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>{active.name}</Box>
-        </Typography>
+function ColorPickerCard({ name, price, colors }: { name: string; price: number; colors: ColorVariant[] }) {
+  const [selected, setSelected] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const active = colors[selected];
 
-        {/* Color swatches */}
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
-          {colors.map((color, i) => (
-            <Tooltip key={i} title={color.name} placement="top" arrow>
-              <Box
-                onClick={() => setSelected(i)}
-                sx={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: '50%',
-                  backgroundColor: color.hex,
-                  cursor: 'pointer',
-                  border: i === selected
-                    ? '2px solid #1e3a8a'
-                    : '2px solid transparent',
-                  outline: i === selected ? '1px solid #1e3a8a' : '1px solid #ccc',
-                  outlineOffset: '2px',
-                  transition: 'outline 0.15s, border 0.15s',
-                  '&:hover': { outline: '1px solid #1e3a8a', outlineOffset: '2px' },
-                  // White swatch needs a border to be visible
-                  ...(color.hex === '#f3f3f3' || color.hex === '#ffffff'
-                    ? { boxShadow: 'inset 0 0 0 1px #ccc' }
-                    : {}),
-                }}
-              />
-            </Tooltip>
-          ))}
+  return (
+    <>
+      <Card
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'transform 0.3s, box-shadow 0.3s',
+          '&:hover': { transform: 'translateY(-8px)', boxShadow: 6 },
+        }}
+      >
+        {/* Image with zoom-in hover effect */}
+        <Box
+          sx={{
+            width: '100%',
+            height: 300,
+            overflow: 'hidden',
+            backgroundColor: '#ffffff',
+            cursor: 'zoom-in',
+            position: 'relative',
+          }}
+          onClick={() => setLightboxOpen(true)}
+        >
+          <Box
+            component="img"
+            src={active.image}
+            alt={`${name} - ${active.name}`}
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              transition: 'transform 0.35s ease',
+              '&:hover': { transform: 'scale(1.08)' },
+            }}
+          />
         </Box>
-      </CardContent>
-    </Card>
+
+        <CardContent sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" component="h3" gutterBottom>
+            {name}
+          </Typography>
+          <Typography variant="h5" color="primary" sx={{ fontWeight: 600, mb: 1.5 }}>
+            ₹{price}
+          </Typography>
+
+          {/* Color label */}
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            Color: <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>{active.name}</Box>
+          </Typography>
+
+          {/* Color swatches */}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+            {colors.map((color, i) => (
+              <Tooltip key={i} title={color.name} placement="top" arrow>
+                <Box
+                  onClick={() => setSelected(i)}
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    backgroundColor: color.hex,
+                    cursor: 'pointer',
+                    border: i === selected ? '2px solid #1e3a8a' : '2px solid transparent',
+                    outline: i === selected ? '1px solid #1e3a8a' : '1px solid #ccc',
+                    outlineOffset: '2px',
+                    transition: 'outline 0.15s, border 0.15s',
+                    '&:hover': { outline: '1px solid #1e3a8a', outlineOffset: '2px' },
+                    ...(color.hex === '#f3f3f3' || color.hex === '#ffffff'
+                      ? { boxShadow: 'inset 0 0 0 1px #ccc' }
+                      : {}),
+                  }}
+                />
+              </Tooltip>
+            ))}
+          </Box>
+        </CardContent>
+      </Card>
+
+      {lightboxOpen && (
+        <ImageLightbox
+          src={active.image}
+          alt={`${name} - ${active.name}`}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
+    </>
   );
 }
 
