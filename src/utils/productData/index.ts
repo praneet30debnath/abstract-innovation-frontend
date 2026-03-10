@@ -1,4 +1,4 @@
-import { ProductVariant } from './types';
+import { ProductVariant, ColorVariant } from './types';
 import customizedCup from './customizedCup';
 import customizedBottle from './customizedBottle';
 import customizedPhotoFrame from './customizedPhotoFrame';
@@ -25,5 +25,5 @@ const productData: Record<string, ProductVariant[]> = {
   'cctv': cctv,
 };
 
-export type { ProductVariant };
+export type { ProductVariant, ColorVariant };
 export default productData;

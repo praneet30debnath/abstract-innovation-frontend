@@ -42,10 +42,10 @@ function getActiveFestivalBanner() {
 }
 
 const featuredProducts = [
-  { name: 'Customized Cup', image: '/images/products/category-customized-cup.jpg', slug: 'customized-cup' },
-  { name: 'Customized Photo Frame', image: '/images/products/category-customized-photo-frame.jpg', slug: 'customized-photo-frame' },
-  { name: 'T Shirt', image: '/images/products/category-t-shirt.jpg', slug: 't-shirt' },
-  { name: 'Customized Candle', image: '/images/products/category-customized-candle.jpg', slug: 'customized-candle' },
+  { name: 'Customized Cup', image: '/images/products/categories/category-customized-cup.jpg', slug: 'customized-cup' },
+  { name: 'Customized Photo Frame', image: '/images/products/categories/category-customized-photo-frame.jpg', slug: 'customized-photo-frame' },
+  { name: 'T Shirt', image: '/images/products/categories/category-t-shirt.jpg', slug: 't-shirt' },
+  { name: 'Customized Candle', image: '/images/products/categories/category-customized-candle.jpg', slug: 'customized-candle' },
 ];
 
 const whyChooseUs = [

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Typography, Box, Card, CardContent, IconButton } from '@mui/material';
+import { Container, Typography, Box, Card, CardContent, IconButton, Tooltip } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import productData from '../utils/productData';
+import { ColorVariant } from '../utils/productData/types';
 
 function ImageCarousel({ images, alt }: { images: string[]; alt: string }) {
   const [current, setCurrent] = useState(0);
@@ -251,6 +252,77 @@ function ImageCarousel({ images, alt }: { images: string[]; alt: string }) {
   );
 }
 
+function ColorPickerCard({ name, price, colors }: { name: string; price: number; colors: ColorVariant[] }) {
+  const [selected, setSelected] = useState(0);
+  const active = colors[selected];
+
+  return (
+    <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'transform 0.3s, box-shadow 0.3s',
+        '&:hover': { transform: 'translateY(-8px)', boxShadow: 6 },
+      }}
+    >
+      <Box
+        component="img"
+        src={active.image}
+        alt={`${name} - ${active.name}`}
+        sx={{
+          width: '100%',
+          height: 300,
+          objectFit: 'contain',
+          backgroundColor: '#ffffff',
+        }}
+      />
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" component="h3" gutterBottom>
+          {name}
+        </Typography>
+        <Typography variant="h5" color="primary" sx={{ fontWeight: 600, mb: 1.5 }}>
+          ₹{price}
+        </Typography>
+
+        {/* Color label */}
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          Color: <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>{active.name}</Box>
+        </Typography>
+
+        {/* Color swatches */}
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {colors.map((color, i) => (
+            <Tooltip key={i} title={color.name} placement="top" arrow>
+              <Box
+                onClick={() => setSelected(i)}
+                sx={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  backgroundColor: color.hex,
+                  cursor: 'pointer',
+                  border: i === selected
+                    ? '2px solid #1e3a8a'
+                    : '2px solid transparent',
+                  outline: i === selected ? '1px solid #1e3a8a' : '1px solid #ccc',
+                  outlineOffset: '2px',
+                  transition: 'outline 0.15s, border 0.15s',
+                  '&:hover': { outline: '1px solid #1e3a8a', outlineOffset: '2px' },
+                  // White swatch needs a border to be visible
+                  ...(color.hex === '#f3f3f3' || color.hex === '#ffffff'
+                    ? { boxShadow: 'inset 0 0 0 1px #ccc' }
+                    : {}),
+                }}
+              />
+            </Tooltip>
+          ))}
+        </Box>
+      </CardContent>
+    </Card>
+  );
+}
+
 function ProductDetail() {
   const { productName } = useParams<{ productName: string }>();
 
@@ -310,41 +382,50 @@ function ProductDetail() {
         }}
       >
         {variants.map((variant, index) => (
-          <Card
-            key={index}
-            sx={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              transition: 'transform 0.3s, box-shadow 0.3s',
-              '&:hover': { transform: 'translateY(-8px)', boxShadow: 6 },
-            }}
-          >
-            {isFridgeMagnet && variant.images ? (
-              <ImageCarousel images={variant.images} alt={variant.name} />
-            ) : (
-              <Box
-                component="img"
-                height="300px"
-                src={variant.image}
-                alt={variant.name}
-                sx={{ objectFit: 'contain', backgroundColor: '#ffffff', width: '100%' }}
-              />
-            )}
-            <CardContent sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" component="h3" gutterBottom>
-                {variant.name}
-              </Typography>
-              <Typography variant="h5" color="primary" sx={{ fontWeight: 600 }}>
-                ₹{variant.price}
-              </Typography>
-              {!isFridgeMagnet && variant.dimensions && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                  {variant.dimensions.height} x {variant.dimensions.width} {variant.dimensions.unit}
-                </Typography>
+          variant.colors ? (
+            <ColorPickerCard
+              key={index}
+              name={variant.name}
+              price={variant.price}
+              colors={variant.colors}
+            />
+          ) : (
+            <Card
+              key={index}
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'transform 0.3s, box-shadow 0.3s',
+                '&:hover': { transform: 'translateY(-8px)', boxShadow: 6 },
+              }}
+            >
+              {isFridgeMagnet && variant.images ? (
+                <ImageCarousel images={variant.images} alt={variant.name} />
+              ) : (
+                <Box
+                  component="img"
+                  height="300px"
+                  src={variant.image}
+                  alt={variant.name}
+                  sx={{ objectFit: 'contain', backgroundColor: '#ffffff', width: '100%' }}
+                />
               )}
-            </CardContent>
-          </Card>
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography variant="h6" component="h3" gutterBottom>
+                  {variant.name}
+                </Typography>
+                <Typography variant="h5" color="primary" sx={{ fontWeight: 600 }}>
+                  ₹{variant.price}
+                </Typography>
+                {!isFridgeMagnet && variant.dimensions && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    {variant.dimensions.height} x {variant.dimensions.width} {variant.dimensions.unit}
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          )
         ))}
       </Box>
 

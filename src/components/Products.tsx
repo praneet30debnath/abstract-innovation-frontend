@@ -4,16 +4,16 @@ import { Container, Typography, Card, CardContent, CardMedia, Box } from '@mui/m
 
 function Products() {
   const products = [
-    { title: 'Customized Cup', icon: '☕', image: '/images/products/category-customized-cup.jpg' },
-    { title: 'Customized Bottle', icon: '🍶', image: '/images/products/category-customized-bottle.jpg' },
-    { title: 'Customized Photo Frame', icon: '🖼️', image: '/images/products/category-customized-photo-frame.jpg' },
-    { title: 'Customized Cushion Cover', icon: '🛋️', image: '/images/products/category-customized-cushion-cover.jpg' },
-    { title: 'Fridge Magnet', icon: '🧲', image: '/images/products/category-fridge-magnet.jpg' },
-    { title: 'Tote Bag', icon: '👜', image: '/images/products/category-tote-bag.jpg' },
-    { title: 'T Shirt', icon: '👕', image: '/images/products/category-t-shirt.jpg' },
-    { title: 'Memento', icon: '🎁', image: '/images/products/category-memento.jpg' },
-    { title: 'Customized Candle', icon: '🕯️', image: '/images/products/category-customized-candle.jpg' },
-    { title: 'CCTV', icon: '📹', image: '/images/products/category-cctv.jpg' }
+    { title: 'Customized Cup', icon: '☕', image: '/images/products/categories/category-customized-cup.jpg' },
+    { title: 'Customized Bottle', icon: '🍶', image: '/images/products/categories/category-customized-bottle.jpg' },
+    { title: 'Customized Photo Frame', icon: '🖼️', image: '/images/products/categories/category-customized-photo-frame.jpg' },
+    { title: 'Customized Cushion Cover', icon: '🛋️', image: '/images/products/categories/category-customized-cushion-cover.jpg' },
+    { title: 'Fridge Magnet', icon: '🧲', image: '/images/products/categories/category-fridge-magnet.jpg' },
+    { title: 'Tote Bag', icon: '👜', image: '/images/products/categories/category-tote-bag.jpg' },
+    { title: 'T Shirt', icon: '👕', image: '/images/products/categories/category-t-shirt.jpg' },
+    { title: 'Memento', icon: '🎁', image: '/images/products/categories/category-memento.jpg' },
+    { title: 'Customized Candle', icon: '🕯️', image: '/images/products/categories/category-customized-candle.jpg' },
+    { title: 'CCTV', icon: '📹', image: '/images/products/categories/category-cctv.jpg' }
   ];
 
   // Helper function to create URL slug from product title
