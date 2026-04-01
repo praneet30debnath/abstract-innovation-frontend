@@ -5,6 +5,9 @@ import Home from './components/Home';
 import Products from './components/Products';
 import ProductDetail from './components/ProductDetail';
 import ContactUs from './components/ContactUs';
+import LoginPage from './components/auth/LoginPage';
+import AuthSuccess from './components/auth/AuthSuccess';
+import UserMenu from './components/auth/UserMenu';
 
 function App() {
   return (
@@ -19,6 +22,7 @@ function App() {
             <Link to="/">Home</Link>
             <Link to="/products">Products</Link>
             <Link to="/contact">Contact Us</Link>
+            <UserMenu />
           </nav>
         </header>
         <main className="main-content">
@@ -27,6 +31,8 @@ function App() {
             <Route path="/products" element={<Products />} />
             <Route path="/products/:productName" element={<ProductDetail />} />
             <Route path="/contact" element={<ContactUs />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/success" element={<AuthSuccess />} />
           </Routes>
         </main>
         <footer className="footer">
