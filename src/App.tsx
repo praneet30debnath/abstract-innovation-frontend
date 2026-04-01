@@ -8,6 +8,7 @@ import ContactUs from './components/ContactUs';
 import LoginPage from './components/auth/LoginPage';
 import AuthSuccess from './components/auth/AuthSuccess';
 import UserMenu from './components/auth/UserMenu';
+import BottomNav from './components/BottomNav';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <UserMenu />
           </nav>
         </header>
+        <BottomNav />
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />

@@ -65,7 +65,6 @@
   background-color: #1e293b;
   color: white;
   padding: 20px;
-  margin-top: auto;
 }
 
 .contact-info {
@@ -175,12 +174,7 @@
   }
 
   .nav-menu {
-    gap: 15px;
-  }
-
-  .nav-menu a {
-    font-size: 16px;
-    padding: 8px 12px;
+    display: none;
   }
 
   .App-header {
@@ -215,6 +209,7 @@
 
   .footer {
     padding: 15px;
+    padding-bottom: 72px;
   }
 
   .contact-info a {
