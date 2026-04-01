@@ -15,7 +15,7 @@ export default function AuthSuccess() {
         navigate('/', { replace: true });
       })
       .catch(() => navigate('/login', { replace: true }));
-  }, []);
+  }, [navigate, setUser]);
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '70vh' }}>
