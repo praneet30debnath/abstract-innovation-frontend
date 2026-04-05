@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Box, Button } from '@mui/material';
+import { Container, Typography, Button } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 export default function OrderSuccess() {

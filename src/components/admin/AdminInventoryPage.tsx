@@ -3,7 +3,7 @@ import {
   Box, Typography, Button, IconButton, Accordion, AccordionSummary, AccordionDetails,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, Switch, FormControlLabel,
   Chip, CircularProgress, Alert, Tooltip, Table, TableBody, TableCell, TableHead,
-  TableRow, Collapse, Divider, Paper, Stack,
+  TableRow, Collapse, Divider, Stack,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
