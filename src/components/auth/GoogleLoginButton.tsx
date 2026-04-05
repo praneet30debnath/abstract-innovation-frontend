@@ -2,14 +2,26 @@ import React from 'react';
 import { Button, Box } from '@mui/material';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+const REDIRECT_KEY = 'abstractinnovation:login-redirect';
 
-export default function GoogleLoginButton() {
+interface Props {
+  redirect?: string;
+}
+
+export default function GoogleLoginButton({ redirect = '/' }: Props) {
+  function handleClick() {
+    if (redirect !== '/') {
+      localStorage.setItem(REDIRECT_KEY, redirect);
+    }
+    window.location.href = `${API_URL}/api/auth/google`;
+  }
+
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <Button
         variant="outlined"
         fullWidth
-        onClick={() => { window.location.href = `${API_URL}/api/auth/google`; }}
+        onClick={handleClick}
         sx={{
           borderColor: '#dadce0',
           color: '#3c4043',

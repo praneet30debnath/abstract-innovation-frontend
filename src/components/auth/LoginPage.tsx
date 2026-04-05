@@ -1,13 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Tabs, Tab, Paper, Typography } from '@mui/material';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import GoogleLoginButton from './GoogleLoginButton';
 import OtpLoginForm from './OtpLoginForm';
-import { useSearchParams } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginPage() {
   const [tab, setTab] = useState(0);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { restoreCart } = useCart();
+  const { user, loading } = useAuth();
   const googleError = searchParams.get('error') === 'google';
+  const redirect = searchParams.get('redirect') || '/';
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate(redirect, { replace: true });
+    }
+  }, [user, loading, navigate, redirect]);
+
+  async function handleOtpSuccess() {
+    await restoreCart();
+    navigate(redirect, { replace: true });
+  }
+
+  if (loading || user) return null;
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '70vh', px: 2 }}>
@@ -32,8 +51,8 @@ export default function LoginPage() {
           <Tab label="Email OTP" />
         </Tabs>
 
-        {tab === 0 && <GoogleLoginButton />}
-        {tab === 1 && <OtpLoginForm />}
+        {tab === 0 && <GoogleLoginButton redirect={redirect} />}
+        {tab === 1 && <OtpLoginForm onSuccess={handleOtpSuccess} />}
       </Paper>
     </Box>
   );

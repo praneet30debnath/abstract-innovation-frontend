@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Typography, CircularProgress, Alert } from '@mui/material';
 import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
-export default function OtpLoginForm() {
+interface Props {
+  onSuccess: () => void;
+}
+
+export default function OtpLoginForm({ onSuccess }: Props) {
   const { setUser } = useAuth();
-  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -42,7 +44,7 @@ export default function OtpLoginForm() {
       await api.post('/api/auth/otp/verify', { email, code });
       const user = await api.get<any>('/api/auth/me');
       setUser(user);
-      navigate('/');
+      onSuccess();
     } catch (err: any) {
       setError(err.message);
     } finally {

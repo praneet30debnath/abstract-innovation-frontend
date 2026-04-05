@@ -1,24 +1,32 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { BottomNavigation, BottomNavigationAction, Paper, Avatar, Menu, MenuItem, Typography } from '@mui/material';
+import { BottomNavigation, BottomNavigationAction, Paper, Avatar, Menu, MenuItem, Typography, Badge } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import CategoryIcon from '@mui/icons-material/Category';
 import PhoneIcon from '@mui/icons-material/Phone';
 import PersonIcon from '@mui/icons-material/Person';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { ORDERS_ENABLED } from '../utils/featureFlags';
 
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { totalCount, saveCart } = useCart();
+
+  async function handleLogout() {
+    setAnchor(null);
+    await saveCart().catch(() => {});
+    logout();
+  }
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
 
-  const pathToValue: Record<string, number> = {
-    '/': 0,
-    '/products': 1,
-    '/contact': 2,
-    '/login': 3,
-  };
+  const pathToValue: Record<string, number> = user
+    ? { '/': 0, '/products': 1, '/contact': 2, '/cart': 3 }
+    : { '/': 0, '/products': 1, '/contact': 2, '/login': 3 };
   const value = pathToValue[location.pathname] ?? false;
 
   const initials = user?.name
@@ -28,10 +36,7 @@ export default function BottomNav() {
   return (
     <>
       <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100, display: { xs: 'block', md: 'none' } }} elevation={4}>
-        <BottomNavigation
-          value={value}
-          sx={{ bgcolor: '#ffffff' }}
-        >
+        <BottomNavigation value={value} sx={{ bgcolor: '#ffffff' }}>
           <BottomNavigationAction
             label="Home"
             icon={<HomeIcon />}
@@ -50,6 +55,18 @@ export default function BottomNav() {
             onClick={() => navigate('/contact')}
             sx={{ color: value === 2 ? '#1e3a8a' : '#64748b', '&.Mui-selected': { color: '#1e3a8a' } }}
           />
+          {user && ORDERS_ENABLED ? (
+            <BottomNavigationAction
+              label="Cart"
+              icon={
+                <Badge badgeContent={totalCount || null} color="error">
+                  <ShoppingCartIcon />
+                </Badge>
+              }
+              onClick={() => navigate('/cart')}
+              sx={{ color: value === 3 ? '#1e3a8a' : '#64748b', '&.Mui-selected': { color: '#1e3a8a' } }}
+            />
+          ) : null}
           <BottomNavigationAction
             label={user ? '' : 'Sign In'}
             icon={
@@ -65,7 +82,7 @@ export default function BottomNav() {
               )
             }
             onClick={e => user ? setAnchor(e.currentTarget) : navigate('/login')}
-            sx={{ color: value === 3 ? '#1e3a8a' : '#64748b', '&.Mui-selected': { color: '#1e3a8a' } }}
+            sx={{ color: '#64748b', '&.Mui-selected': { color: '#1e3a8a' } }}
           />
         </BottomNavigation>
       </Paper>
@@ -80,7 +97,13 @@ export default function BottomNav() {
         <MenuItem disabled>
           <Typography variant="body2" color="text.secondary">{user?.email}</Typography>
         </MenuItem>
-        <MenuItem onClick={() => { setAnchor(null); logout(); }}>
+        {user?.role === 'admin' && (
+          <MenuItem onClick={() => { setAnchor(null); navigate('/admin'); }}>
+            <AdminPanelSettingsIcon fontSize="small" sx={{ mr: 1, color: '#1e3a8a' }} />
+            Admin Panel
+          </MenuItem>
+        )}
+        <MenuItem onClick={handleLogout}>
           Sign out
         </MenuItem>
       </Menu>

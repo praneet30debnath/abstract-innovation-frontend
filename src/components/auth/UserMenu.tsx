@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
-import { Avatar, Menu, MenuItem, IconButton, Typography, Box } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Avatar, Menu, MenuItem, IconButton, Typography, Box, Divider } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 
 export default function UserMenu() {
   const { user, logout } = useAuth();
+  const { saveCart } = useCart();
+  const navigate = useNavigate();
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
+
+  async function handleLogout() {
+    setAnchor(null);
+    await saveCart().catch(() => {});
+    logout();
+  }
 
   if (!user) {
     return (
@@ -39,7 +49,15 @@ export default function UserMenu() {
         <MenuItem disabled>
           <Typography variant="body2" color="text.secondary">{user.email}</Typography>
         </MenuItem>
-        <MenuItem onClick={() => { setAnchor(null); logout(); }}>
+        {user.role === 'admin' && [
+          <Divider key="div" />,
+          <MenuItem key="admin" onClick={() => { setAnchor(null); navigate('/admin'); }}>
+            <AdminPanelSettingsIcon fontSize="small" sx={{ mr: 1, color: '#1e3a8a' }} />
+            Admin Panel
+          </MenuItem>,
+        ]}
+        <Divider />
+        <MenuItem onClick={handleLogout}>
           Sign out
         </MenuItem>
       </Menu>

@@ -3,19 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
+
+const REDIRECT_KEY = 'abstractinnovation:login-redirect';
 
 export default function AuthSuccess() {
   const { setUser } = useAuth();
+  const { restoreCart } = useCart();
   const navigate = useNavigate();
 
   useEffect(() => {
     api.get<any>('/api/auth/me')
-      .then(user => {
+      .then(async user => {
         setUser(user);
-        navigate('/', { replace: true });
+        await restoreCart();
+        const redirect = localStorage.getItem(REDIRECT_KEY) || '/';
+        localStorage.removeItem(REDIRECT_KEY);
+        navigate(redirect, { replace: true });
       })
       .catch(() => navigate('/login', { replace: true }));
-  }, [navigate, setUser]);
+  }, [navigate, setUser, restoreCart]);
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '70vh' }}>
