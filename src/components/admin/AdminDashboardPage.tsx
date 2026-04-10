@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Card, CardContent, Typography, CircularProgress, Alert } from '@mui/material';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
-import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
+import PaymentIcon from '@mui/icons-material/Payment';
 import { api } from '../../services/api';
 
 interface Stats {
   total: number;
-  pending: number;
+  paid: number;
   processing: number;
   completed: number;
   cancelled: number;
@@ -24,11 +24,11 @@ const STAT_CARDS = (s: Stats) => [
     color: '#7c3aed',
   },
   {
-    label: 'Pending',
-    value: s.pending,
-    icon: <PendingActionsIcon />,
-    bg: '#fef3c7',
-    color: '#d97706',
+    label: 'Paid (Awaiting Processing)',
+    value: s.paid,
+    icon: <PaymentIcon />,
+    bg: '#bbf7d0',
+    color: '#15803d',
   },
   {
     label: 'Completed',
@@ -84,10 +84,15 @@ export default function AdminDashboardPage() {
         ))}
       </Box>
 
-      {stats.processing > 0 && (
+      {(stats.paid > 0 || stats.processing > 0) && (
         <Box sx={{ mt: 3, p: 2, borderRadius: 2, bgcolor: '#eff6ff', border: '1px solid #bfdbfe' }}>
           <Typography variant="body2" color="#1d4ed8">
-            <strong>{stats.processing}</strong> order{stats.processing !== 1 ? 's' : ''} currently in processing.
+            {stats.paid > 0 && (
+              <><strong>{stats.paid}</strong> paid order{stats.paid !== 1 ? 's' : ''} awaiting processing.{' '}</>
+            )}
+            {stats.processing > 0 && (
+              <><strong>{stats.processing}</strong> order{stats.processing !== 1 ? 's' : ''} currently in processing.</>
+            )}
           </Typography>
         </Box>
       )}

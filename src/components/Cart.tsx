@@ -4,13 +4,15 @@ import {
   Container, Typography, Box, Card, CardContent,
   Button, Divider, CircularProgress, Alert, IconButton,
   Radio, RadioGroup, FormControlLabel, TextField, Collapse,
-  Chip, Skeleton,
+  Chip, Skeleton, Select, MenuItem, InputLabel, FormControl,
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { loadRazorpay } from '../utils/loadRazorpay';
+import type { RazorpayResponse } from '../types/razorpay.d';
 
 interface Address {
   id: number;
@@ -34,6 +36,18 @@ interface AddressForm {
   pincode: string;
 }
 
+type PaymentStatus = 'idle' | 'creating' | 'awaiting_payment' | 'verifying' | 'failed';
+
+const INDIAN_STATES = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
+  'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
+  'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
+  'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
+];
+
 const emptyForm: AddressForm = {
   name: '', phone: '', address1: '', address2: '', city: '', state: '', pincode: '',
 };
@@ -43,11 +57,15 @@ export default function Cart() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('idle');
+  const [wasCancelled, setWasCancelled] = useState(false);
   const [error, setError] = useState('');
 
   const [deliveryCharge, setDeliveryCharge] = useState<number | null>(null);
   const [deliveryLoading, setDeliveryLoading] = useState(false);
+  const [deliveryError, setDeliveryError] = useState(false);
+  const [pincodeServiceable, setPincodeServiceable] = useState<boolean | null>(null);
+  const [pincodeEmbargo, setPincodeEmbargo] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -61,30 +79,51 @@ export default function Cart() {
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const cgm = totalQuantity * 500;
 
-  // Derive current active pincode from selected address or new address form
   const activePincode =
     selectedAddressId === 'new' || selectedAddressId === null
       ? (newAddress.pincode.length === 6 ? newAddress.pincode : null)
       : (addresses.find(a => a.id === selectedAddressId)?.pincode ?? null);
 
+  // Fetch serviceability + delivery charges
   useEffect(() => {
-    if (!activePincode) { setDeliveryCharge(null); return; }
+    if (!activePincode) {
+      setDeliveryCharge(null);
+      setDeliveryError(false);
+      setPincodeServiceable(null);
+      setPincodeEmbargo(false);
+      return;
+    }
+    setPincodeServiceable(null);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setDeliveryLoading(true);
+      setDeliveryError(false);
       try {
-        const result = await api.get<{ total_amount: number }>(
-          `/api/shipments/charges?d_pin=${activePincode}&cgm=${cgm}`
-        );
-        setDeliveryCharge(result.total_amount);
-      } catch {
-        setDeliveryCharge(null);
+        const [serviceability, charges] = await Promise.allSettled([
+          api.get<{ serviceable: boolean; embargo: boolean }>(`/api/shipments/serviceability?pincode=${activePincode}`),
+          api.get<{ total_amount: number }>(`/api/shipments/charges?d_pin=${activePincode}&cgm=${cgm}`),
+        ]);
+
+        if (serviceability.status === 'fulfilled') {
+          setPincodeServiceable(serviceability.value.serviceable);
+          setPincodeEmbargo(serviceability.value.embargo);
+        } else {
+          setPincodeServiceable(null);
+        }
+
+        if (charges.status === 'fulfilled') {
+          setDeliveryCharge(charges.value.total_amount);
+        } else {
+          setDeliveryCharge(null);
+          setDeliveryError(true);
+        }
       } finally {
         setDeliveryLoading(false);
       }
     }, 600);
   }, [activePincode, cgm]);
 
+  // Load saved addresses
   useEffect(() => {
     if (!user) return;
     api.get<Address[]>('/api/addresses')
@@ -119,6 +158,7 @@ export default function Cart() {
   async function handlePlaceOrder() {
     if (!user) { navigate('/login'); return; }
 
+    // --- Resolve shipping address ---
     let shippingAddress: Omit<Address, 'id' | 'is_default'> & { addressId?: number };
 
     if (selectedAddressId === 'new' || selectedAddressId === null) {
@@ -156,8 +196,15 @@ export default function Cart() {
       };
     }
 
-    setLoading(true);
     setError('');
+    setWasCancelled(false);
+    setPaymentStatus('creating');
+
+    // --- Step 1: Create order on server ---
+    let rzpOrderId: string;
+    let amountPaise: number;
+    let dbOrderId: number;
+    let itemIds: number[];
 
     try {
       const orderPayload = items.map(item => ({
@@ -170,36 +217,106 @@ export default function Cart() {
         needsImage: !!(item.imageFile || item.pendingImageKey),
       }));
 
-      const { orderId, itemIds } = await api.post<{ orderId: number; itemIds: number[] }>(
-        '/api/orders',
+      const result = await api.post<{ rzpOrderId: string; amount: number; dbOrderId: number; itemIds: number[] }>(
+        '/api/create-order',
         { items: orderPayload, shippingAddress }
       );
+      rzpOrderId = result.rzpOrderId;
+      amountPaise = result.amount;
+      dbOrderId = result.dbOrderId;
+      itemIds = result.itemIds;
+    } catch (err: any) {
+      setPaymentStatus('failed');
+      setError(err.message || 'Failed to create order. Please try again.');
+      return;
+    }
 
+    // --- Step 2: Upload images (now that we have dbOrderId) ---
+    try {
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         if (item.imageFile) {
           const formData = new FormData();
           formData.append('file', item.imageFile);
-          formData.append('orderId', String(orderId));
+          formData.append('orderId', String(dbOrderId));
           formData.append('itemId', String(itemIds[i]));
           formData.append('productSlug', item.productSlug);
           await api.uploadFile<{ url: string }>('/api/upload', formData);
         } else if (item.pendingImageKey) {
           await api.post('/api/cart/move-image', {
             pendingImageKey: item.pendingImageKey,
-            orderId,
+            orderId: dbOrderId,
             itemId: itemIds[i],
             productSlug: item.productSlug,
           });
         }
       }
-
-      await clearCartFromServer();
-      navigate(`/order-success?orderId=${orderId}`);
     } catch (err: any) {
-      setError(err.message || 'Failed to place order');
-    } finally {
-      setLoading(false);
+      // Image upload failed — payment can still proceed, images can be re-attached by admin
+      console.error('Image upload failed:', err);
+    }
+
+    // --- Step 3: Load Razorpay SDK ---
+    try {
+      await loadRazorpay();
+    } catch {
+      setPaymentStatus('failed');
+      setError('Payment gateway blocked. Please disable your ad-blocker and try again.');
+      return;
+    }
+
+    // --- Step 4: Open Razorpay checkout ---
+    setPaymentStatus('awaiting_payment');
+
+    const rzp = new window.Razorpay({
+      key: process.env.REACT_APP_RAZORPAY_KEY_ID!,
+      amount: amountPaise,
+      currency: 'INR',
+      name: 'Abstract Innovation',
+      description: 'Personalized Gifts',
+      order_id: rzpOrderId,
+      prefill: {
+        name: shippingAddress.name,
+        contact: shippingAddress.phone,
+        email: user.email,
+      },
+      theme: { color: '#1e3a8a' },
+      modal: {
+        ondismiss: () => {
+          setPaymentStatus('idle');
+          setWasCancelled(true);
+          setError(`Payment cancelled. Your order is saved — click "Retry Payment" to try again.`);
+        },
+      },
+      handler: async (response: RazorpayResponse) => {
+        setPaymentStatus('verifying');
+        try {
+          await api.post('/api/verify-payment', {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          });
+          await clearCartFromServer();
+          navigate(`/order-success?orderId=${dbOrderId}`);
+        } catch {
+          setPaymentStatus('failed');
+          setError(`Payment verified by Razorpay but confirmation failed. Contact support with Order ID: ${dbOrderId}`);
+        }
+      },
+    });
+
+    rzp.open();
+  }
+
+  const isProcessing = paymentStatus !== 'idle' && paymentStatus !== 'failed';
+
+  function getButtonLabel() {
+    switch (paymentStatus) {
+      case 'creating': return 'Creating order...';
+      case 'awaiting_payment': return 'Waiting for payment...';
+      case 'verifying': return 'Verifying payment...';
+      case 'failed': return 'Retry Payment';
+      default: return wasCancelled ? 'Retry Payment' : 'Pay Now';
     }
   }
 
@@ -246,7 +363,12 @@ export default function Cart() {
                   ₹{item.price} × {item.quantity} = <strong>₹{item.price * item.quantity}</strong>
                 </Typography>
               </Box>
-              <IconButton size="small" onClick={() => removeItem(index)} color="error">
+              <IconButton
+                size="small"
+                onClick={() => removeItem(index)}
+                color="error"
+                disabled={isProcessing}
+              >
                 <DeleteOutlineIcon />
               </IconButton>
             </CardContent>
@@ -295,7 +417,6 @@ export default function Cart() {
             </Card>
           ))}
 
-          {/* Add new address option */}
           <Card
             variant="outlined"
             sx={{
@@ -323,9 +444,21 @@ export default function Cart() {
           </Box>
           {formField('Address Line 1 *', 'address1')}
           {formField('Address Line 2 (optional)', 'address2')}
+          <FormControl size="small" fullWidth>
+            <InputLabel>State *</InputLabel>
+            <Select
+              label="State *"
+              value={newAddress.state}
+              onChange={e => setNewAddress(prev => ({ ...prev, state: e.target.value }))}
+              MenuProps={{ PaperProps: { style: { maxHeight: 240 } } }}
+            >
+              {INDIAN_STATES.map(s => (
+                <MenuItem key={s} value={s}>{s}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Box sx={{ display: 'flex', gap: 2 }}>
             {formField('City *', 'city')}
-            {formField('State *', 'state')}
             {formField('Pincode *', 'pincode', { inputProps: { maxLength: 6 } })}
           </Box>
           <FormControlLabel
@@ -341,8 +474,17 @@ export default function Cart() {
         </Box>
       </Collapse>
 
+      {activePincode && !deliveryLoading && pincodeServiceable === false && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {pincodeEmbargo
+            ? 'Delivery to this pincode is temporarily unavailable. Please try a different address.'
+            : 'Delivery is not available to this pincode. Please use a different address.'}
+        </Alert>
+      )}
+
       <Divider sx={{ mb: 2 }} />
 
+      {/* Order summary */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="body1" color="text.secondary">Subtotal</Typography>
@@ -354,6 +496,8 @@ export default function Cart() {
             <Skeleton width={60} height={24} />
           ) : deliveryCharge !== null ? (
             <Typography variant="body1">₹{deliveryCharge.toFixed(2)}</Typography>
+          ) : deliveryError ? (
+            <Typography variant="body2" color="error">Unavailable</Typography>
           ) : (
             <Typography variant="body2" color="text.secondary">
               {activePincode ? '—' : 'Select address'}
@@ -369,17 +513,17 @@ export default function Cart() {
         </Box>
       </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && <Alert severity={paymentStatus === 'failed' ? 'warning' : 'error'} sx={{ mb: 2 }}>{error}</Alert>}
 
       <Button
         variant="contained"
         size="large"
         fullWidth
         onClick={handlePlaceOrder}
-        disabled={loading || addressLoading || deliveryLoading || deliveryCharge === null}
-        startIcon={loading ? <CircularProgress size={18} color="inherit" /> : null}
+        disabled={isProcessing || addressLoading || deliveryLoading || !activePincode || pincodeServiceable !== true}
+        startIcon={isProcessing ? <CircularProgress size={18} color="inherit" /> : null}
       >
-        {loading ? 'Placing Order...' : 'Place Order'}
+        {getButtonLabel()}
       </Button>
     </Container>
   );

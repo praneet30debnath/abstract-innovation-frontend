@@ -12,7 +12,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
-import { ORDERS_ENABLED } from '../utils/featureFlags';
+import { isOrdersEnabled } from '../utils/featureFlags';
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 
@@ -340,6 +340,7 @@ function ColorPickerCard({
   needsImage: boolean;
   needsSize: boolean;
 }) {
+  const { user } = useAuth();
   const [selected, setSelected] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const active = colors[selected];
@@ -371,7 +372,7 @@ function ColorPickerCard({
               </Tooltip>
             ))}
           </Box>
-          {ORDERS_ENABLED && (
+          {isOrdersEnabled(user?.email) && (
             <ProductActions
               productSlug={productSlug}
               productName={productName}
@@ -392,6 +393,7 @@ function ColorPickerCard({
 
 function ProductDetail() {
   const { productName } = useParams<{ productName: string }>();
+  const { user } = useAuth();
   const [product, setProduct] = useState<ApiProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -470,7 +472,7 @@ function ProductDetail() {
                     {dimensions.height} x {dimensions.width} {dimensions.unit}
                   </Typography>
                 )}
-                {ORDERS_ENABLED && (
+                {isOrdersEnabled(user?.email) && (
                   <ProductActions
                     productSlug={productName || ''}
                     productName={displayName}

@@ -9,7 +9,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { ORDERS_ENABLED } from '../utils/featureFlags';
+import { isOrdersEnabled } from '../utils/featureFlags';
 
 export default function BottomNav() {
   const navigate = useNavigate();
@@ -21,6 +21,7 @@ export default function BottomNav() {
     setAnchor(null);
     await saveCart().catch(() => {});
     logout();
+    navigate('/');
   }
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
 
@@ -55,7 +56,7 @@ export default function BottomNav() {
             onClick={() => navigate('/contact')}
             sx={{ color: value === 2 ? '#1e3a8a' : '#64748b', '&.Mui-selected': { color: '#1e3a8a' } }}
           />
-          {user && ORDERS_ENABLED ? (
+          {user && isOrdersEnabled(user.email) ? (
             <BottomNavigationAction
               label="Cart"
               icon={

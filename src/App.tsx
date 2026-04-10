@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import { Badge, IconButton } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import './App.css';
@@ -9,6 +9,7 @@ import ProductDetail from './components/ProductDetail';
 import ContactUs from './components/ContactUs';
 import Cart from './components/Cart';
 import OrderSuccess from './components/OrderSuccess';
+import OrderTracking from './components/OrderTracking';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboardPage from './components/admin/AdminDashboardPage';
 import AdminOrdersPage from './components/admin/AdminOrdersPage';
@@ -19,14 +20,20 @@ import UserMenu from './components/auth/UserMenu';
 import BottomNav from './components/BottomNav';
 import { CartProvider, useCart } from './context/CartContext';
 import { useAuth } from './context/AuthContext';
-import { ORDERS_ENABLED } from './utils/featureFlags';
+import { isOrdersEnabled } from './utils/featureFlags';
+
+function OrdersGate({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  if (!isOrdersEnabled(user?.email)) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
 
 function CartIcon() {
   const { totalCount } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  if (!user || !ORDERS_ENABLED) return null;
+  if (!user || !isOrdersEnabled(user.email)) return null;
 
   return (
     <IconButton onClick={() => navigate('/cart')} size="small" sx={{ color: 'inherit' }}>
@@ -72,8 +79,9 @@ function App() {
                   <Route path="/products" element={<Products />} />
                   <Route path="/products/:productName" element={<ProductDetail />} />
                   <Route path="/contact" element={<ContactUs />} />
-                  {ORDERS_ENABLED && <Route path="/cart" element={<Cart />} />}
-                  {ORDERS_ENABLED && <Route path="/order-success" element={<OrderSuccess />} />}
+                  <Route path="/cart" element={<OrdersGate><Cart /></OrdersGate>} />
+                  <Route path="/order-success" element={<OrdersGate><OrderSuccess /></OrdersGate>} />
+                  <Route path="/track/:orderId" element={<OrdersGate><OrderTracking /></OrdersGate>} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/auth/success" element={<AuthSuccess />} />
                 </Routes>

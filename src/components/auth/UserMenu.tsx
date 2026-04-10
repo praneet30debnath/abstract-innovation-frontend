@@ -15,6 +15,7 @@ export default function UserMenu() {
     setAnchor(null);
     await saveCart().catch(() => {});
     logout();
+    navigate('/');
   }
 
   if (!user) {
