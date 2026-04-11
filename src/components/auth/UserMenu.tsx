@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Avatar, Menu, MenuItem, IconButton, Typography, Box, Divider } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
@@ -57,6 +58,11 @@ export default function UserMenu() {
             Admin Panel
           </MenuItem>,
         ]}
+        <Divider />
+        <MenuItem onClick={() => { setAnchor(null); navigate('/orders'); }}>
+          <ReceiptLongIcon fontSize="small" sx={{ mr: 1, color: '#1e3a8a' }} />
+          My Orders
+        </MenuItem>
         <Divider />
         <MenuItem onClick={handleLogout}>
           Sign out

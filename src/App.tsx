@@ -10,6 +10,7 @@ import ContactUs from './components/ContactUs';
 import Cart from './components/Cart';
 import OrderSuccess from './components/OrderSuccess';
 import OrderTracking from './components/OrderTracking';
+import MyOrders from './components/MyOrders';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboardPage from './components/admin/AdminDashboardPage';
 import AdminOrdersPage from './components/admin/AdminOrdersPage';
@@ -82,6 +83,7 @@ function App() {
                   <Route path="/cart" element={<OrdersGate><Cart /></OrdersGate>} />
                   <Route path="/order-success" element={<OrdersGate><OrderSuccess /></OrdersGate>} />
                   <Route path="/track/:orderId" element={<OrdersGate><OrderTracking /></OrdersGate>} />
+                  <Route path="/orders" element={<OrdersGate><MyOrders /></OrdersGate>} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/auth/success" element={<AuthSuccess />} />
                 </Routes>

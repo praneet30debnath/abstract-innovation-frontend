@@ -7,6 +7,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import PersonIcon from '@mui/icons-material/Person';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { isOrdersEnabled } from '../utils/featureFlags';
@@ -97,6 +98,10 @@ export default function BottomNav() {
       >
         <MenuItem disabled>
           <Typography variant="body2" color="text.secondary">{user?.email}</Typography>
+        </MenuItem>
+        <MenuItem onClick={() => { setAnchor(null); navigate('/orders'); }}>
+          <ReceiptLongIcon fontSize="small" sx={{ mr: 1, color: '#1e3a8a' }} />
+          My Orders
         </MenuItem>
         {user?.role === 'admin' && (
           <MenuItem onClick={() => { setAnchor(null); navigate('/admin'); }}>
