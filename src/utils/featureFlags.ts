@@ -12,3 +12,8 @@ export function isOrdersEnabled(email?: string): boolean {
 }
 
 export const ORDERS_ENABLED = ORDERS_ENABLED_GLOBAL;
+
+export function isWhitelisted(email?: string): boolean {
+  if (!email) return false;
+  return ORDERS_WHITELIST.includes(email.toLowerCase());
+}

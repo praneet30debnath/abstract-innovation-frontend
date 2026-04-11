@@ -3,6 +3,7 @@ import { Avatar, Menu, MenuItem, IconButton, Typography, Box, Divider } from '@m
 import { Link, useNavigate } from 'react-router-dom';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import TestPaymentButton from '../TestPaymentButton';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
@@ -58,6 +59,8 @@ export default function UserMenu() {
             Admin Panel
           </MenuItem>,
         ]}
+        <Divider />
+        <TestPaymentButton onClose={() => setAnchor(null)} />
         <Divider />
         <MenuItem onClick={() => { setAnchor(null); navigate('/orders'); }}>
           <ReceiptLongIcon fontSize="small" sx={{ mr: 1, color: '#1e3a8a' }} />
