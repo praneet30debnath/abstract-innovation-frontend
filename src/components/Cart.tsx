@@ -76,7 +76,6 @@ export default function Cart() {
   const [addressLoading, setAddressLoading] = useState(true);
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const cgm = items.reduce((sum, item) => sum + item.quantity * (item.weightGrams ?? 250), 0);
 
   const activePincode =
