@@ -667,8 +667,9 @@ export default function AdminInventoryPage() {
   }
 
   function refreshFullProduct(id: number) {
-    setFullProducts(prev => { const copy = { ...prev }; delete copy[id]; return copy; });
-    loadFullProduct(id);
+    api.get<FullProduct>(`/api/products/admin/${id}/full`)
+      .then(data => setFullProducts(prev => ({ ...prev, [id]: data })))
+      .catch(() => {});
   }
 
   function handleAccordionChange(id: number) {
