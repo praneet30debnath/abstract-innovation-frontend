@@ -77,7 +77,7 @@ export default function Cart() {
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-  const cgm = totalQuantity * 500;
+  const cgm = items.reduce((sum, item) => sum + item.quantity * (item.weightGrams ?? 250), 0);
 
   const activePincode =
     selectedAddressId === 'new' || selectedAddressId === null
@@ -86,7 +86,7 @@ export default function Cart() {
 
   // Fetch serviceability + delivery charges
   useEffect(() => {
-    if (!activePincode) {
+    if (!activePincode || cgm === 0) {
       setDeliveryCharge(null);
       setDeliveryError(false);
       setPincodeServiceable(null);

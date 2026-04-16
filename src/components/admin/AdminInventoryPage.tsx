@@ -33,6 +33,7 @@ interface Color { id: number; variant_id: number; hex: string; name: string; ima
 interface Variant {
   id: number; product_id: number; name: string; price: number; image_url: string;
   height: number | null; width: number | null; dimension_unit: string | null;
+  weight_grams: number | null;
   sort_order: number; is_active: boolean;
   images: VariantImage[]; colors: Color[];
 }
@@ -172,6 +173,7 @@ function ProductDialog({ open, mode, initial, onClose, onSaved }: {
 
 interface VariantFormState {
   name: string; price: string; image_url: string;
+  weight_grams: string;
   height: string; width: string; dimension_unit: string; is_active: boolean;
 }
 
@@ -185,7 +187,7 @@ function VariantDialog({ open, mode, productSlug, productId, initial, onClose, o
   onSaved: () => void;
 }) {
   const [form, setForm] = useState<VariantFormState>({
-    name: '', price: '', image_url: '', height: '', width: '', dimension_unit: '', is_active: true,
+    name: '', price: '', image_url: '', weight_grams: '', height: '', width: '', dimension_unit: '', is_active: true,
   });
   const [saving, setSaving] = useState(false);
 
@@ -194,6 +196,7 @@ function VariantDialog({ open, mode, productSlug, productId, initial, onClose, o
       name: initial?.name ?? '',
       price: initial?.price?.toString() ?? '',
       image_url: initial?.image_url ?? '',
+      weight_grams: initial?.weight_grams?.toString() ?? '',
       height: initial?.height?.toString() ?? '',
       width: initial?.width?.toString() ?? '',
       dimension_unit: initial?.dimension_unit ?? '',
@@ -202,13 +205,14 @@ function VariantDialog({ open, mode, productSlug, productId, initial, onClose, o
   }, [open, initial]);
 
   async function handleSave() {
-    if (!form.name.trim() || !form.price || !form.image_url) return;
+    if (!form.name.trim() || !form.price || !form.image_url || !form.weight_grams) return;
     setSaving(true);
     try {
       const payload = {
         name: form.name,
         price: Number(form.price),
         image_url: form.image_url,
+        weight_grams: Number(form.weight_grams),
         height: form.height ? Number(form.height) : undefined,
         width: form.width ? Number(form.width) : undefined,
         dimension_unit: form.dimension_unit || undefined,
@@ -238,6 +242,12 @@ function VariantDialog({ open, mode, productSlug, productId, initial, onClose, o
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2.5 }}>
         <TextField label="Name" size="small" value={form.name} onChange={set('name')} required />
         <TextField label="Price (₹)" type="number" size="small" value={form.price} onChange={set('price')} required />
+        <TextField
+          label="Weight (grams)" type="number" size="small" value={form.weight_grams}
+          onChange={set('weight_grams')} required
+          helperText="Used for delivery charge calculation"
+          inputProps={{ min: 1 }}
+        />
         <Box>
           <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>Primary Image *</Typography>
           <ImageUploadButton slug={productSlug} previewUrl={form.image_url || undefined}
@@ -256,7 +266,7 @@ function VariantDialog({ open, mode, productSlug, productId, initial, onClose, o
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} sx={{ color: '#64748b' }}>Cancel</Button>
         <Button variant="contained" onClick={handleSave}
-          disabled={saving || !form.name || !form.price || !form.image_url}
+          disabled={saving || !form.name || !form.price || !form.image_url || !form.weight_grams}
           sx={{ bgcolor: '#1e3a8a', '&:hover': { bgcolor: '#1e40af' }, textTransform: 'none' }}>
           {saving ? 'Saving…' : 'Save'}
         </Button>
@@ -407,10 +417,13 @@ function VariantRow({ variant, productSlug, onRefresh, onEdit, onDelete }: {
         <TableCell>
           <Typography variant="body2" fontWeight={600}>{variant.name}</Typography>
           {variant.height && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" display="block">
               {variant.height} × {variant.width} {variant.dimension_unit}
             </Typography>
           )}
+          <Typography variant="caption" color={variant.weight_grams ? 'text.secondary' : 'warning.main'}>
+            {variant.weight_grams ? `${variant.weight_grams}g` : '⚠ weight not set (250g fallback)'}
+          </Typography>
         </TableCell>
         <TableCell>
           <Typography variant="body2" fontWeight={700} color="#1e3a8a">₹{variant.price}</Typography>

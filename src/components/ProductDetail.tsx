@@ -23,6 +23,7 @@ interface ApiVariantImage { id: number; image_url: string; }
 interface ApiVariant {
   id: number; name: string; price: number; image_url: string;
   height: number | null; width: number | null; dimension_unit: string | null;
+  weight_grams: number | null;
   images: ApiVariantImage[]; colors: ApiColor[];
 }
 interface ApiProduct {
@@ -38,6 +39,7 @@ function ProductActions({
   productName,
   variantName,
   price,
+  weightGrams,
   needsImage,
   needsSize,
 }: {
@@ -45,6 +47,7 @@ function ProductActions({
   productName: string;
   variantName: string;
   price: number;
+  weightGrams?: number;
   needsImage: boolean;
   needsSize: boolean;
 }) {
@@ -77,6 +80,7 @@ function ProductActions({
       variantName,
       price,
       quantity: 1,
+      weightGrams: weightGrams ?? undefined,
       imageFile: imageFile ?? undefined,
       size: size || undefined,
     });
@@ -330,12 +334,13 @@ function ImageLightbox({ src, alt, onClose }: { src: string; alt: string; onClos
 // ── Color picker card ─────────────────────────────────────────────────────────
 
 function ColorPickerCard({
-  productSlug, productName, name, price, colors, needsImage, needsSize,
+  productSlug, productName, name, price, weightGrams, colors, needsImage, needsSize,
 }: {
   productSlug: string;
   productName: string;
   name: string;
   price: number;
+  weightGrams?: number;
   colors: { hex: string; name: string; image: string }[];
   needsImage: boolean;
   needsSize: boolean;
@@ -378,6 +383,7 @@ function ColorPickerCard({
               productName={productName}
               variantName={`${name} - ${active.name}`}
               price={price}
+              weightGrams={weightGrams}
               needsImage={needsImage}
               needsSize={needsSize}
             />
@@ -453,6 +459,7 @@ function ProductDetail() {
               productName={displayName}
               name={variant.name}
               price={variant.price}
+              weightGrams={variant.weight_grams ?? undefined}
               colors={mappedColors}
               needsImage={needsImage}
               needsSize={needsSize}
@@ -478,6 +485,7 @@ function ProductDetail() {
                     productName={displayName}
                     variantName={variant.name}
                     price={variant.price}
+                    weightGrams={variant.weight_grams ?? undefined}
                     needsImage={needsImage}
                     needsSize={needsSize}
                   />

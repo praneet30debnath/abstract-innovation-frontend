@@ -7,6 +7,7 @@ export interface CartItem {
   variantName: string;
   price: number;
   quantity: number;
+  weightGrams?: number;     // Per-item weight in grams; undefined = 250g fallback
   imageFile?: File;
   pendingImageKey?: string; // S3 key for items restored from Redis
   previewUrl?: string;      // Presigned URL for restored image preview
@@ -57,6 +58,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             variantName: item.variantName,
             price: item.price,
             quantity: item.quantity,
+            weightGrams: item.weightGrams,
             size: item.size,
             pendingImageKey: key,
           };
@@ -67,6 +69,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           variantName: item.variantName,
           price: item.price,
           quantity: item.quantity,
+          weightGrams: item.weightGrams,
           size: item.size,
           pendingImageKey: item.pendingImageKey,
         };
