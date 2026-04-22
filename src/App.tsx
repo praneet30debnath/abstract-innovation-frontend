@@ -91,7 +91,7 @@ function App() {
               <footer className="footer">
                 <p>&copy; 2026 Abstract Innovation. All rights reserved.</p>
                 <div className="contact-info">
-                  <a href="tel:+913346039929">+91 33 4603 9929</a> | <a href="tel:+919830064192">+91 98300 64192</a>
+                  <a href="tel:+913335935473">+91 33 3593 5473</a> | <a href="tel:+919123845902">+91 91238 45902</a>
                 </div>
               </footer>
             </div>
