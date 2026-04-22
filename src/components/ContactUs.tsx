@@ -89,8 +89,8 @@ function ContactUs() {
               }}
             >
               <Typography variant="h6">
-                <a href="tel:+913346039929" style={{ textDecoration: 'none', color: 'inherit' }}>
-                  +91 33 4603 9929
+                <a href="tel:+913335935473" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  +91 33 3593 5473
                 </a>
               </Typography>
             </Box>
@@ -110,8 +110,8 @@ function ContactUs() {
               }}
             >
               <Typography variant="h6">
-                <a href="tel:+919830064192" style={{ textDecoration: 'none', color: 'inherit' }}>
-                  +91 98300 64192
+                <a href="tel:+919123845902" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  +91 91238 45902
                 </a>
               </Typography>
             </Box>
